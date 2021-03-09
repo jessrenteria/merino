@@ -3,5 +3,5 @@
 ### How to run:
 ```
 ⇒ docker build -t shears .
-⇒ docker run -v $PWD/:/app shears python /app/mine_for_gold.py -h
+⇒ docker run --rm -v $PWD/:/app shears python mine_for_gold.py -h
 ```
