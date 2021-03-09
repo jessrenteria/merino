@@ -5,6 +5,8 @@ Requires authentication via command line arguments.
 import argparse
 import praw
 
+from model.tickers import scrape_tickers
+
 
 _USERNAME = 'projectmerino'
 _USER_AGENT = (
@@ -46,6 +48,7 @@ def main():
     for comment in reddit.subreddit('wallstreetbets').comments():
         print(comment.author.name + ' says:\n')
         print(comment.body)
+        print('Ticker counts: ' + repr(scrape_tickers(comment.body)))
 
 
 if __name__ == '__main__':
