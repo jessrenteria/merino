@@ -1,4 +1,4 @@
-name: Pylint
+name: Run Python linter
 on: [push]
 jobs:
   build:
@@ -16,6 +16,6 @@ jobs:
     - name: Download Google style guide
       run: |
         wget https://google.github.io/styleguide/pylintrc -O .pylintrc
-    - name: Analysing the code with pylint
+    - name: Analyze code with pylint
       run: |
         find . -name '*.py' -exec pylint --rcfile=.pylintrc {} \;
