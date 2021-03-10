@@ -1,7 +1,7 @@
 name: Run Python linter
 on: [push]
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -18,4 +18,4 @@ jobs:
         wget https://google.github.io/styleguide/pylintrc -O .pylintrc
     - name: Analyze code with pylint
       run: |
-        find . -name '*.py' -exec pylint --rcfile=.pylintrc {} \;
+        find . -name '*.py' -exec pylint --rcfile=.pylintrc --fail-under=10 {} \;
