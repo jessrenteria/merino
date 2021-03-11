@@ -6,7 +6,7 @@ import argparse
 import praw
 
 from model.nasdaq_screener import parse_nasdaq_screener
-from model.tickers import get_ticker_set, scrape_tickers, Ticker
+from model.tickers import scrape_tickers, Ticker
 
 
 _USERNAME = 'projectmerino'
