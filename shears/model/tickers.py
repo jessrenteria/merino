@@ -24,6 +24,15 @@ def _map_optional(
     return filter(lambda x: x is not None, map(f, it))
 
 
+def get_ticker_set() -> frozenset[Ticker]:
+    """Returns a frozenset of known tickers.
+
+    This is just a temporary convenience function until we get stock market API
+    integration.
+    """
+    return frozenset(('GME', 'AMC', 'TSLA', 'RKT'))
+
+
 def scrape_tickers(
     text: str,
     whitelist: Optional[frozenset[Ticker]] = None
