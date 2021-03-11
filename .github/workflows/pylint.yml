@@ -16,7 +16,7 @@ jobs:
     - name: Download Google style guide, amend indentations
       run: |
         wget https://google.github.io/styleguide/pylintrc -O .pylintrc
-        sed "s/indent-string='  '/indent-string='    '/" -i .bak .pylintrc
+        sed -i "s/indent-string='  '/indent-string='    '/" .pylintrc
     - name: Analyze code with pylint
       run: |
         pylint --rcfile=.pylintrc --fail-under=10 **/*.py
