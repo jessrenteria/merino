@@ -5,6 +5,7 @@ Requires authentication via command line arguments.
 import argparse
 import praw
 
+from model.tickers import get_ticker_set
 from model.tickers import scrape_tickers
 
 
@@ -45,10 +46,12 @@ def main():
     print('Authenticated!')
 
     print('Mining for gold...')
+    whitelist = get_ticker_set()
     for comment in reddit.subreddit('wallstreetbets').comments():
         print(comment.author.name + ' says:\n')
         print(comment.body)
-        print('Ticker counts: ' + repr(scrape_tickers(comment.body)))
+        print('Ticker counts: ' + repr(scrape_tickers(comment.body,
+                                                      whitelist=whitelist)))
 
 
 if __name__ == '__main__':
