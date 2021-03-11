@@ -24,12 +24,19 @@ def _map_optional(
     return filter(lambda x: x is not None, map(f, it))
 
 
-def scrape_tickers(text: str) -> Counter[Ticker]:
-    """Aggregates ticker mentions from a body of text.
+def scrape_tickers(
+    text: str,
+    whitelist: Optional[frozenset[Ticker]] = None
+) -> Counter[Ticker]:
+    """Aggregates whitelisted ticker mentions from a body of text.
     """
     def _scrape_ticker(token: str) -> Optional[Ticker]:
-        if 1 <= len(token) <= 4 and token.isalpha() and token.isupper():
-            return token
+        if whitelist is None:
+            if 1 <= len(token) <= 4 and token.isalpha() and token.isupper():
+                return token
+        else:
+            if token in whitelist:
+                return token
     text = text.translate(str.maketrans('', '', string.punctuation))
     counts = Counter()
     counts.update(_map_optional(_scrape_ticker, text.split()))
