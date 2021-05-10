@@ -4,6 +4,7 @@ Requires authentication via command line arguments.
 """
 import argparse
 import praw
+from requests import Session
 
 from model.tickers import get_ticker_set
 from model.tickers import scrape_tickers
@@ -15,6 +16,8 @@ _USER_AGENT = (
     '(by /u/projectmerino)'
 )
 
+session = Session()
+session.verify = "/path/to/certfile.pem" 
 
 def main():
     parser = argparse.ArgumentParser(description='Mine for gold.')
@@ -36,6 +39,8 @@ def main():
     args = parser.parse_args()
 
     print('Authenticating Reddit API connection...')
+    
+    """Authorized Reddit Instances"""
     reddit = praw.Reddit(
         client_id=args.client_id,
         client_secret=args.client_secret,
@@ -47,12 +52,23 @@ def main():
 
     print('Mining for gold...')
     whitelist = get_ticker_set()
-    for comment in reddit.subreddit('wallstreetbets').comments():
-        print(comment.author.name + ' says:\n')
-        print(comment.body)
-        print('Ticker counts: ' + repr(scrape_tickers(comment.body,
-                                                      whitelist=whitelist)))
 
+    updated_json = {}
+    updated_json["wallstreetbets"] = []
+    try:
+        with open('comments.json') as current_comments:    
+            current_data = json.load(current_comments)
+            all_new_comments = []
+            for dicObj in current_data["wallstreetbets"]:
+                all_new_comments.append(dicObj)
+            for comment in reddit.subreddit('wallstreetbets').comments():
+                all_new_comments.append({"Name": comment.author.name, "Body": comment.body,})
+            current_data["wallstreetbets"] = all_new_comments
+            updated_json["wallstreetbets"] = current_data["wallstreetbets"]
+            with open('comments.json', 'w') as outfile:
+                json.dump(updated_json, outfile)
+    except IOError as io:
+        print( "ERROR: " + io)
 
 if __name__ == '__main__':
     main()
