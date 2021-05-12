@@ -12,7 +12,7 @@ from model.tickers import get_ticker_set
 from model.tickers import scrape_tickers
 
 
-_USERNAME = 'noahbram'
+_USERNAME = 'projectmerino'
 _USER_AGENT = (
     'python:com.projectmerino.exploration:v0 '
     '(by /u/projectmerino)'
