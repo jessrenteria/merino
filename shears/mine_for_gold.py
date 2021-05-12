@@ -12,7 +12,7 @@ from model.tickers import get_ticker_set
 from model.tickers import scrape_tickers
 
 
-_USERNAME = 'projectmerino'
+_USERNAME = 'noahbram'
 _USER_AGENT = (
     'python:com.projectmerino.exploration:v0 '
     '(by /u/projectmerino)'
@@ -72,21 +72,25 @@ def main():
                 current_data = json.load(current_comments)
             except : 
                 current_data = {}
-            all_new_comments = []
+            new_and_old_comments = []
             if subredditName in current_data:
                 for dicObj in current_data[subredditName]:
-                    all_new_comments.append(dicObj)
+                    new_and_old_comments.append(dicObj)
             for comment in reddit.subreddit(subredditName).comments():
-                all_new_comments.append({
-                    "Date": datetime.utcfromtimestamp(comment.created_utc).strftime('%Y-%m-%d %H:%M:%S'),
-                    "ID": comment.id, 
-                    "Name": comment.author.name, 
-                    "Body": comment.body, 
-                    "Votes": comment.score})
-            current_data[subredditName] = all_new_comments
+                if comment.id in new_and_old_comments:
+                    continue
+                new_and_old_comments.append({
+                    comment.id :{
+                        "Date": datetime.utcfromtimestamp(comment.created_utc).strftime('%Y-%m-%d %H:%M:%S'),
+                        "Name": comment.author.name, 
+                        "Body": comment.body, 
+                        "Votes": comment.score
+                        } 
+                    })
+            current_data[subredditName] = new_and_old_comments
             updated_json[subredditName] = current_data[subredditName]
             with open('comments.json', 'w') as outfile:
-                json.dump(updated_json, outfile, indent=4)
+                json.dump(updated_json, outfile, indent=4, sort_keys=True)
     except IOError as io:
         print( "ERROR: " + io)
 
