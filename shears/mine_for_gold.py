@@ -5,6 +5,8 @@ Requires authentication via command line arguments.
 import argparse
 import praw
 from requests import Session
+import simplejson as json
+from datetime import datetime
 
 from model.tickers import get_ticker_set
 from model.tickers import scrape_tickers
@@ -19,6 +21,7 @@ _USER_AGENT = (
 session = Session()
 session.verify = "/path/to/certfile.pem" 
 
+""" Note: If you are only analyzing public comments, entering a username and password is optional. """
 def main():
     parser = argparse.ArgumentParser(description='Mine for gold.')
     parser.add_argument(
@@ -48,25 +51,42 @@ def main():
         password=args.password,
         user_agent=_USER_AGENT,
     )
+
+    """ To verify that you are authenticated as the correct user """
+    print(reddit.user.me())     
+    
     print('Authenticated!')
+
 
     print('Mining for gold...')
     whitelist = get_ticker_set()
 
+    subredditName = "wallstreetbets"
+
     updated_json = {}
-    updated_json["wallstreetbets"] = []
+    updated_json[subredditName] = []
+
     try:
-        with open('comments.json') as current_comments:    
-            current_data = json.load(current_comments)
+        with open('comments.json') as current_comments: 
+            try:   
+                current_data = json.load(current_comments)
+            except : 
+                current_data = {}
             all_new_comments = []
-            for dicObj in current_data["wallstreetbets"]:
-                all_new_comments.append(dicObj)
-            for comment in reddit.subreddit('wallstreetbets').comments():
-                all_new_comments.append({"Name": comment.author.name, "Body": comment.body,})
-            current_data["wallstreetbets"] = all_new_comments
-            updated_json["wallstreetbets"] = current_data["wallstreetbets"]
+            if subredditName in current_data:
+                for dicObj in current_data[subredditName]:
+                    all_new_comments.append(dicObj)
+            for comment in reddit.subreddit(subredditName).comments():
+                all_new_comments.append({
+                    "Date": datetime.utcfromtimestamp(comment.created_utc).strftime('%Y-%m-%d %H:%M:%S'),
+                    "ID": comment.id, 
+                    "Name": comment.author.name, 
+                    "Body": comment.body, 
+                    "Votes": comment.score})
+            current_data[subredditName] = all_new_comments
+            updated_json[subredditName] = current_data[subredditName]
             with open('comments.json', 'w') as outfile:
-                json.dump(updated_json, outfile)
+                json.dump(updated_json, outfile, indent=4)
     except IOError as io:
         print( "ERROR: " + io)
 
