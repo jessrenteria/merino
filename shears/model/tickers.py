@@ -9,8 +9,8 @@ from typing import Optional, TypeVar
 # A stock ticker symbol.
 Ticker = str
 
-_A = TypeVar('A')
-_B = TypeVar('B')
+_A = TypeVar('_A')
+_B = TypeVar('_B')
 
 
 def _map_optional(

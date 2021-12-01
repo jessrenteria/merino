@@ -4,22 +4,18 @@ Requires authentication via command line arguments.
 """
 import argparse
 import praw
-from requests import Session
 import simplejson as json
-from datetime import datetime
 
+from datetime import datetime
 from model.tickers import get_ticker_set
 from model.tickers import scrape_tickers
-
 
 _USERNAME = 'projectmerino'
 _USER_AGENT = (
     'python:com.projectmerino.exploration:v0 '
     '(by /u/projectmerino)'
 )
-
-session = Session()
-session.verify = "/path/to/certfile.pem" 
+_SUBREDDIT_NAME = 'wallstreetbets'
 
 """ Note: If you are only analyzing public comments, entering a username and password is optional. """
 def main():
@@ -43,7 +39,6 @@ def main():
 
     print('Authenticating Reddit API connection...')
     
-    """Authorized Reddit Instances"""
     reddit = praw.Reddit(
         client_id=args.client_id,
         client_secret=args.client_secret,
@@ -52,47 +47,39 @@ def main():
         user_agent=_USER_AGENT,
     )
 
-    """ To verify that you are authenticated as the correct user """
-    print(reddit.user.me())     
-    
-    print('Authenticated!')
-
+    print(f'Authenticated as reddit user {reddit.user.me()}')
 
     print('Mining for gold...')
     whitelist = get_ticker_set()
 
-    subredditName = "wallstreetbets"
-
     updated_json = {}
-    updated_json[subredditName] = []
+    updated_json[_SUBREDDIT_NAME] = []
+    current_data = {}
 
-    try:
-        with open('comments.json') as current_comments: 
-            try:   
-                current_data = json.load(current_comments)
-            except : 
-                current_data = {}
-            new_and_old_comments = []
-            if subredditName in current_data:
-                for dicObj in current_data[subredditName]:
-                    new_and_old_comments.append(dicObj)
-            for comment in reddit.subreddit(subredditName).comments():
-                if comment.id in new_and_old_comments:
-                    continue
-                new_and_old_comments.append({
-                    comment.id :{
-                        "Date": datetime.utcfromtimestamp(comment.created_utc).strftime('%Y-%m-%d %H:%M:%S'),
-                        "Name": comment.author.name, 
-                        "Body": comment.body, 
-                        "Votes": comment.score
-                        } 
-                    })
-            current_data[subredditName] = new_and_old_comments
-            updated_json[subredditName] = current_data[subredditName]
-            with open('comments.json', 'w') as outfile:
-                json.dump(updated_json, outfile, indent=4, sort_keys=True)
-    except IOError as io:
-        print( "ERROR: " + io)
+    with open('comments.json') as current_comments: 
+        current_data = json.load(current_comments)
+
+    new_and_old_comments = []
+    
+    if _SUBREDDIT_NAME in current_data:
+        new_and_old_comments.extend(current_data[_SUBREDDIT_NAME])
+
+    for comment in reddit.subreddit(_SUBREDDIT_NAME).comments():
+        if comment.id in new_and_old_comments:
+            continue
+        new_and_old_comments.append({
+            comment.id :{
+                'Date': datetime.utcfromtimestamp(comment.created_utc).strftime('%Y-%m-%d %H:%M:%S'),
+                'Name': comment.author.name, 
+                'Body': comment.body, 
+                'Votes': comment.score
+            }})
+    current_data[_SUBREDDIT_NAME] = new_and_old_comments
+    updated_json[_SUBREDDIT_NAME] = current_data[_SUBREDDIT_NAME]
+
+    with open('comments.json', 'w') as outfile:
+        json.dump(updated_json, outfile, indent=4, sort_keys=True)
+
 
 if __name__ == '__main__':
     main()
