@@ -4,13 +4,13 @@ Requires authentication via command line arguments.
 """
 import argparse
 import praw
-import simplejson as json
+import json
 
 from datetime import datetime
-from model.tickers import get_ticker_set
-from model.tickers import scrape_tickers
+"""from model.tickers import get_ticker_set
+from model.tickers import scrape_tickers"""
 
-_USERNAME = 'projectmerino'
+_USERNAME = 'noahbram'
 _USER_AGENT = (
     'python:com.projectmerino.exploration:v0 '
     '(by /u/projectmerino)'
@@ -50,14 +50,17 @@ def main():
     print(f'Authenticated as reddit user {reddit.user.me()}')
 
     print('Mining for gold...')
-    whitelist = get_ticker_set()
+    """whitelist = get_ticker_set()"""
 
     updated_json = {}
     updated_json[_SUBREDDIT_NAME] = []
     current_data = {}
 
     with open('comments.json') as current_comments: 
-        current_data = json.load(current_comments)
+        try: 
+            current_data = json.load(current_comments)
+        except:
+            pass
 
     new_and_old_comments = []
     
