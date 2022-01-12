@@ -5,7 +5,7 @@ Requires authentication via command line arguments.
 import argparse
 import praw
 import json
-
+ 
 from datetime import datetime
 """from model.tickers import get_ticker_set
 from model.tickers import scrape_tickers"""
